@@ -17,6 +17,20 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     await client.connect();
+
+    const db = client.db("PlayNest");
+    const facilities = db.collection("facilities");
+
+    app.get("/feature-facilities", async (req, res) => {
+      try {
+        const result = await facilities.find().limit(7).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching facilities:", error);
+        res.status(500).send({ error: "Failed to fetch facilities" });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
