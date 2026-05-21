@@ -18,7 +18,19 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+const verifyToken = (req, res, next) => {
+  const authHeader = req?.headers?.authorization;
 
+  if (!authHeader) {
+    return res.status(401).json({ message: "unauthorized" });
+  }
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "unauthorized" });
+  }
+
+  next();
+};
 const run = async () => {
   try {
     // await client.connect(); // comment for production
@@ -43,7 +55,7 @@ const run = async () => {
       res.send(result);
     });
 
-    app.get("/manage-facilities/:userId", async (req, res) => {
+    app.get("/manage-facilities/:userId", verifyToken, async (req, res) => {
       const userId = req.params.userId;
 
       const user = await users.findOne({
@@ -134,7 +146,6 @@ const run = async () => {
       res.send(result);
     });
 
-
     app.post("/booking", async (req, res) => {
       const newBooking = req.body;
 
@@ -158,7 +169,7 @@ const run = async () => {
         data: result,
       });
     });
-    app.post("/add-facility", async (req, res) => {
+    app.post("/add-facility", verifyToken, async (req, res) => {
       const facility = req.body;
       const result = await facilities.insertOne(facility);
       res.send(result);
