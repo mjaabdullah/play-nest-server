@@ -106,6 +106,35 @@ const run = async () => {
         });
       }
     });
+    app.get("/booking/:id", async (req, res) => {
+      const userId = req.params.id;
+      const result = await bookings
+        .find({
+          user_id: userId,
+        })
+        .toArray();
+      if (result.length === 0) {
+        return res.status(400).send({
+          success: false,
+          message: "You have no booking!",
+        });
+      }
+      res.send(result);
+    });
+
+    app.delete("/booking", async (req, res) => {
+      const id = req.query.id;
+      const user = req.query.user;
+      console.log(req.query);
+      const query = {
+        _id: new ObjectId(id),
+        user_id: user,
+      };
+      const result = await bookings.deleteOne(query);
+      res.send(result);
+    });
+
+
     app.post("/booking", async (req, res) => {
       const newBooking = req.body;
 
