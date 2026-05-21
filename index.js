@@ -41,6 +41,11 @@ const run = async () => {
       res.send(result);
     });
 
+    app.get("/manage-facilities", async (req, res) => {
+      const result = await facilities.find().toArray();
+      res.send(result);
+    });
+
     app.post("/add-facility", async (req, res) => {
       const facility = req.body;
       const result = await facilities.insertOne(facility);
