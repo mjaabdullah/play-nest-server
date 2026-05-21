@@ -1,7 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
+
 const app = express();
+app.use(cors());
+app.use(express.json());
+
 const port = process.env.PORT || 5000;
 
 const uri = process.env.MONGO_URI;
@@ -33,6 +38,12 @@ const run = async () => {
 
     app.get("/all-facilities", async (req, res) => {
       const result = await facilities.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/add-facility", async (req, res) => {
+      const facility = req.body;
+      const result = await facilities.insertOne(facility);
       res.send(result);
     });
 
