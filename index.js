@@ -25,6 +25,7 @@ const run = async () => {
 
     const db = client.db("PlayNest");
     const facilities = db.collection("facilities");
+    const users = db.collection("user");
 
     app.get("/feature-facilities", async (req, res) => {
       try {
@@ -41,8 +42,23 @@ const run = async () => {
       res.send(result);
     });
 
-    app.get("/manage-facilities", async (req, res) => {
-      const result = await facilities.find().toArray();
+    app.get("/manage-facilities/:userId", async (req, res) => {
+      const userId = req.params.userId;
+
+      const user = await users.findOne({
+        _id: new ObjectId(userId),
+      });
+
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+
+      const result = await facilities
+        .find({
+          owner_email: user.email,
+        })
+        .toArray();
+
       res.send(result);
     });
 
