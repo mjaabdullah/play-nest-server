@@ -83,7 +83,29 @@ app.get("/facility/:id", async (req, res) => {
     });
   }
 });
+    
+    
+app.patch("/facility/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updatedFacility = req.body;
 
+    const result = await facilities.updateOne(
+      {
+        _id: new ObjectId(id),
+      },
+      {
+        $set: updatedFacility,
+      },
+    );
+
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({
+      message: "Failed to update facility",
+    });
+  }
+});
     app.post("/add-facility", async (req, res) => {
       const facility = req.body;
       const result = await facilities.insertOne(facility);
