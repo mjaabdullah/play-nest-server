@@ -26,6 +26,7 @@ const run = async () => {
     const db = client.db("PlayNest");
     const facilities = db.collection("facilities");
     const users = db.collection("user");
+    const bookings = db.collection("bookings");
 
     app.get("/feature-facilities", async (req, res) => {
       try {
@@ -62,50 +63,72 @@ const run = async () => {
       res.send(result);
     });
 
-app.get("/facility/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
+    app.get("/facility/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
 
-    const result = await facilities.findOne({
-      _id: new ObjectId(id),
+        const result = await facilities.findOne({
+          _id: new ObjectId(id),
+        });
+
+        if (!result) {
+          return res.status(404).send({
+            message: "Facility not found",
+          });
+        }
+
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({
+          message: "Invalid facility id",
+        });
+      }
     });
 
-    if (!result) {
-      return res.status(404).send({
-        message: "Facility not found",
+    app.patch("/facility/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updatedFacility = req.body;
+
+        const result = await facilities.updateOne(
+          {
+            _id: new ObjectId(id),
+          },
+          {
+            $set: updatedFacility,
+          },
+        );
+
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({
+          message: "Failed to update facility",
+        });
+      }
+    });
+    app.post("/booking", async (req, res) => {
+      const newBooking = req.body;
+
+      const existingBooking = await bookings.findOne({
+        facility_id: newBooking.facility_id,
+        user_id: newBooking.user_id,
+        booking_date: newBooking.booking_date,
       });
-    }
 
-    res.send(result);
-  } catch (error) {
-    res.status(500).send({
-      message: "Invalid facility id",
+      if (existingBooking) {
+        return res.status(400).send({
+          success: false,
+          message: "You have already booked this facility on this date!",
+        });
+      }
+
+      const result = await bookings.insertOne(newBooking);
+      res.send({
+        success: true,
+        message: "Booking successful!",
+        data: result,
+      });
     });
-  }
-});
-    
-    
-app.patch("/facility/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const updatedFacility = req.body;
-
-    const result = await facilities.updateOne(
-      {
-        _id: new ObjectId(id),
-      },
-      {
-        $set: updatedFacility,
-      },
-    );
-
-    res.send(result);
-  } catch (error) {
-    res.status(500).send({
-      message: "Failed to update facility",
-    });
-  }
-});
     app.post("/add-facility", async (req, res) => {
       const facility = req.body;
       const result = await facilities.insertOne(facility);
