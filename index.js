@@ -62,6 +62,28 @@ const run = async () => {
       res.send(result);
     });
 
+app.get("/facility/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const result = await facilities.findOne({
+      _id: new ObjectId(id),
+    });
+
+    if (!result) {
+      return res.status(404).send({
+        message: "Facility not found",
+      });
+    }
+
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({
+      message: "Invalid facility id",
+    });
+  }
+});
+
     app.post("/add-facility", async (req, res) => {
       const facility = req.body;
       const result = await facilities.insertOne(facility);
