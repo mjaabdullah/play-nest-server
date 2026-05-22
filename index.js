@@ -125,12 +125,7 @@ const run = async () => {
           user_id: userId,
         })
         .toArray();
-      if (result.length === 0) {
-        return res.status(400).send({
-          success: false,
-          message: "You have no booking!",
-        });
-      }
+
       res.send(result);
     });
 
