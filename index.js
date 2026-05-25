@@ -50,8 +50,54 @@ const run = async () => {
       }
     });
 
+    // app.get("/all-facilities", async (req, res) => {
+    //   const result = await facilities.find().toArray();
+    //   res.send(result);
+    // });
+
     app.get("/all-facilities", async (req, res) => {
-      const result = await facilities.find().toArray();
+      const search = req.query.search;
+      const category = req.query.category;
+
+      let query = {};
+
+      // Search by facility name
+      if (search) {
+        query.name = {
+          $regex: search,
+          $options: "i",
+        };
+      }
+
+      // Filter by category
+      if (category) {
+        query.facility_type = category;
+      }
+
+      const result = await facilities.find(query).toArray();
+
+      res.send(result);
+    });
+
+    app.get("/facility-categories", async (req, res) => {
+      const result = await facilities
+        .aggregate([
+          {
+            $group: {
+              _id: "$facility_type",
+              total: { $sum: 1 },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              category: "$_id",
+              total: 1,
+            },
+          },
+        ])
+        .toArray();
+
       res.send(result);
     });
 
