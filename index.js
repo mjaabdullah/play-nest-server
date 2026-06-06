@@ -74,8 +74,7 @@ const run = async () => {
       // Filter by category
       if (category) {
         query.facility_type = {
-          $regex: category,
-          $options: "i",
+          $in: [new RegExp(category, "i")],
         };
       }
 
