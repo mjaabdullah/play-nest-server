@@ -58,6 +58,7 @@ const run = async () => {
     app.get("/all-facilities", async (req, res) => {
       const search = req.query.search;
       const category = req.query.category;
+      console.log(search, category);
 
       let query = {};
 
@@ -67,11 +68,15 @@ const run = async () => {
           $regex: search,
           $options: "i",
         };
+        console.log("search, category");
       }
 
       // Filter by category
       if (category) {
-        query.facility_type = category;
+        query.facility_type = {
+          $regex: category,
+          $options: "i",
+        };
       }
 
       const result = await facilities.find(query).toArray();
